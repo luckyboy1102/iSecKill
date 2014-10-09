@@ -27,24 +27,27 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 public class Taobao {
     private static final Logger logger = Logger.getLogger(Taobao.class);
      
     private static String loginUrl = "https://login.taobao.com/member/login.jhtml";
      
-    private static String tbToken = null;// ÌÔ±¦Áì½ğ±ÒÊ¹ÓÃµÄtoken
+    private static String tbToken = null;// token
      
-    private static DefaultHttpClient httpclient = null;// HttpClient¶ÔÏó
+    private static DefaultHttpClient httpclient = null;// HttpClient object
      
     private static HttpResponse response = null;
      
-    private String userName = "";// ÓÃ»§Ãû
+    private String userName = "";// login username
      
-    private String passWord = "";// ÃÜÂëÃ÷ÎÄ
+    private String passWord = "";// login password
      
     /**
-     * ¹¹Ôìº¯Êı
+     * Constructor
      * 
      * @param userName
      * @param passWord
@@ -55,7 +58,7 @@ public class Taobao {
     }
      
     /**
-     * µÇÂ½ÌÔ±¦
+     * Login request
      * 
      * @return
      * @throws IOException 
@@ -67,15 +70,15 @@ public class Taobao {
         }
      
         httpclient = new DefaultHttpClient();
-        // Éè¶¨cookie²ßÂÔ
+        // Set cookie policy
         HttpClientParams.setCookiePolicy(httpclient.getParams(),
         CookiePolicy.BROWSER_COMPATIBILITY);
-        // µÇÂ½Ê¹ÓÃµÄ±íµ¥Êı¾İ
+        // Set login data
         List<NameValuePair> loginParams = new ArrayList<NameValuePair>();
         loginParams.add(new BasicNameValuePair("TPL_username", userName));
         loginParams.add(new BasicNameValuePair("TPL_password", passWord));
          
-        //µÇÂ½postÇëÇó
+        // Create the login request
         HttpPost loginPost = new HttpPost(loginUrl);
         loginPost.addHeader("Referer", loginUrl);
         loginPost.addHeader("Content-Type","application/x-www-form-urlencoded; charset=utf-8");
@@ -85,20 +88,20 @@ public class Taobao {
         try {
             loginPost.setEntity(new UrlEncodedFormEntity(loginParams,  HTTP.UTF_8));
              
-            //»ñÈ¡µÇÂ½Ó¦´ğÄÚÈİ
+            // Get response
             response = httpclient.execute(loginPost);
              
             if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
                 String redirectUrl=getRedirectUrl();
                 if(!"".equals(redirectUrl)){
-                    //ÓĞÖØ¶¨ÏòËµÃ÷³É¹¦ÁË,»ñÈ¡token
+                    // If url not null, get the token
                     getTbToken(redirectUrl);
                 }else{
-                    logger.info("µÇÂ½ÇëÇó³ö´í£¬ÖØ¶¨ÏòÊ§°Ü£¡");
+                    logger.info("ç™»é™†è¯·æ±‚å‡ºé”™ï¼Œé‡å®šå‘å¤±è´¥ï¼");
                     return false;
                 }
             }else{
-                logger.info("µÇÂ½ÇëÇó³ö´í£¬post·µ»Ø×´Ì¬:"+response.getStatusLine().getStatusCode());
+                logger.info("ç™»é™†è¯·æ±‚å‡ºé”™ï¼Œpostè¿”å›çŠ¶æ€:"+response.getStatusLine().getStatusCode());
                 return false;
             }
         } catch (Exception e) {
@@ -110,7 +113,7 @@ public class Taobao {
         return true;
     }
     /**
-     * ÁìÈ¡Ã¿ÈÕ½ğ±Ò
+     * Get the coin
      */
     @SuppressWarnings("rawtypes")
     public boolean getEveryDayCoins(){
@@ -128,8 +131,8 @@ public class Taobao {
         try {
             gainCoinResponse1 = httpclient.execute(gainCoinGet1);
             HttpEntity httpEntity = gainCoinResponse1.getEntity(); 
-            String responseJsonStr = EntityUtils.toString(httpEntity);//È¡³öÓ¦´ğ×Ö·û´® 
-            //logger.info("ÁìÈ¡½ğ±ÒÓ¦´ğ×Ö·û´®£º"+responseJsonStr);
+            String responseJsonStr = EntityUtils.toString(httpEntity);//Get the response string
+            //logger.info("é¢†å–é‡‘å¸åº”ç­”å­—ç¬¦ä¸²ï¼š"+responseJsonStr);
             Map map = JSONObject.fromObject(responseJsonStr);
             int code=(Integer)map.get("code");
             int daysTomorrow=(Integer)map.get("daysTomorrow");
@@ -139,22 +142,22 @@ public class Taobao {
             int coinGot=coinNew-coinOld;
              
             if(1==code){
-                logger.info("³É¹¦ÁìÈ¡"+coinGot+"¸öÌÔ½ğ±Ò£¬ÒÑÁ¬Áì"+daysTomorrow+"Ìì£¬µ±Ç°½ğ±ÒÊıÁ¿"+coinNew+"£¬Ã÷Ìì¿ÉÁì"+coinTomorrow);
+                logger.info("æˆåŠŸé¢†å–"+coinGot+"ä¸ªæ·˜é‡‘å¸ï¼Œå·²è¿é¢†"+daysTomorrow+"å¤©ï¼Œå½“å‰é‡‘å¸æ•°é‡"+coinNew+"ï¼Œæ˜å¤©å¯é¢†"+coinTomorrow);
                 flag=true;
             }else if(4==code){
-                logger.info("Å¶? ĞèÒªÊäÈëÑéÖ¤Âë£¬Áì¸öÌÔ½ğ±Ò»¹ÕâÃ´Âé·³£¡");
+                logger.info("å“¦? éœ€è¦è¾“å…¥éªŒè¯ç ï¼Œé¢†ä¸ªæ·˜é‡‘å¸è¿˜è¿™ä¹ˆéº»çƒ¦ï¼");
             }else if(5==code){
-                logger.info("ÑéÖ¤Âë´íÎó£¡");
+                logger.info("éªŒè¯ç é”™è¯¯ï¼");
             }else if(6==code){
-                logger.info("Õâ½ĞÉñÂíÂß¼­£¬ÓĞ5¸öºÃÓÑµÄÓÃ»§²ÅÄÜÌìÌìÁì½ğ±Ò£¬µ±Ç°ÌÔ½ğ±ÒÊıÁ¿"+coinNew);
+                logger.info("è¿™å«ç¥é©¬é€»è¾‘ï¼Œæœ‰5ä¸ªå¥½å‹çš„ç”¨æˆ·æ‰èƒ½å¤©å¤©é¢†é‡‘å¸ï¼Œå½“å‰æ·˜é‡‘å¸æ•°é‡"+coinNew);
             }else if(2==code){
-                logger.info("½ñÌìÔËÆø²»´í£¬ÒÑ¾­ÁìÁË");
+                logger.info("ä»Šå¤©è¿æ°”ä¸é”™ï¼Œå·²ç»é¢†äº†");
                 flag=true;
             }else{
-                logger.info("Ã»¼û¹ıÕâ¸öcode£¬ÎÊÎÊÌÔ±¦¿Í·ş£¿");
+                logger.info("æ²¡è§è¿‡è¿™ä¸ªcodeï¼Œé—®é—®æ·˜å®å®¢æœï¼Ÿ");
                 flag=true;
             }
-            //ÒÔ·ÀÍòÒ»£¬ÔÙÖ´ĞĞÒ»´Î.....
+            // In case of failure, run again
             gainCoinResponse1 = httpclient.execute(gainCoinGet1);
         } catch (ClientProtocolException e) {
             // TODO Auto-generated catch block
@@ -169,21 +172,21 @@ public class Taobao {
     }
      
     /**
-     * »ñÈ¡ÌÔ±¦ÖØ¶¨Ïòurl
+     * Get the redirect url
      * @return
      */
     private String getRedirectUrl(){
         String redirectUrl="";
         HttpEntity resEntity =  response.getEntity();
          try {
-            String bufferPageHtml=EntityUtils.toString(resEntity, HTTP.UTF_8);
-            Pattern pattern1 = Pattern.compile("window.location = \"(.*)\";");
-            Matcher m1 = pattern1.matcher(bufferPageHtml);
-            if (m1.find()) {
-                redirectUrl=m1.group(1);
+            String bufferPageHtml = EntityUtils.toString(resEntity, HTTP.UTF_8);
+            Document doc = Jsoup.parse(bufferPageHtml);
+            Elements elements = doc.getElementsByTag("script");
+            System.out.println(elements.get(2).data());
+            if (false) {
                 logger.info("redirectUrl:"+redirectUrl);
             } else {
-                logger.error("»ñÈ¡redirectUrlÊ§°Ü£¡");
+                logger.error("è·å–redirectUrlå¤±è´¥ï¼");
             }
         } catch (ParseException e) {
             e.printStackTrace();
@@ -193,10 +196,10 @@ public class Taobao {
         return redirectUrl;
     }
     /**
-     * »ñÈ¡ÌÔ±¦µÇÂ½ÁîÅÆ
-     * ¿ÉÒÔÊ¹ÓÃÁ½ÖÖ·½Ê½
-     * 1.jsoup½âÎöÍøÒ³»ñÈ¡
-     * 2.´Óhttpclient¶ÔÏóµÄcookieÖĞ»ñÈ¡
+     * è·å–æ·˜å®ç™»é™†ä»¤ç‰Œ
+     * å¯ä»¥ä½¿ç”¨ä¸¤ç§æ–¹å¼
+     * 1.jsoupè§£æç½‘é¡µè·å–
+     * 2.ä»httpclientå¯¹è±¡çš„cookieä¸­è·å–
      * @param redirectUrl
      */
     private void getTbToken(String redirectUrl){
@@ -223,7 +226,7 @@ public class Taobao {
                   //logger.info( cookies.get(i).toString());  
                    if(cookie.getName().equals("_tb_token_")){
                         tbToken=cookie.getValue();
-                        logger.info("ÌÔ±¦ÁîÅÆ:"+tbToken);
+                        logger.info("æ·˜å®ä»¤ç‰Œ:"+tbToken);
                     }
               }    
          }
