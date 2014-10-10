@@ -11,7 +11,7 @@ public class SimClient {
 	ApacheHttpInvoker invoker = new ApacheHttpInvoker();
 	
 	public static void main(String[] args) {
-		Taobao taobao = new Taobao("luckyboy1102", "F75f1Es5");
+		Taobao taobao = new Taobao("luckyboy1102", "asdf");
 		System.out.println(taobao.login());
 	}
 }
