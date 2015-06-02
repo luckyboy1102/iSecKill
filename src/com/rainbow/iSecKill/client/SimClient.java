@@ -1,17 +1,17 @@
 package com.rainbow.iSecKill.client;
 
-import org.apache.log4j.Logger;
+import com.rainbow.iSecKill.net.RequestSender;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
-import com.rainbow.iSecKill.net.ApacheHttpInvoker;
-import com.rainbow.iSecKill.net.Taobao;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SimClient {
-	private static final Logger logger = Logger.getLogger(SimClient.class);
-	
-	ApacheHttpInvoker invoker = new ApacheHttpInvoker();
-	
+
 	public static void main(String[] args) {
-		Taobao taobao = new Taobao("luckyboy1102", "asdf");
-		System.out.println(taobao.login());
-	}
+        String result = RequestSender.execute("http://210.28.81.11/zf/", null);
+    }
+
 }
