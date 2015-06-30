@@ -14,21 +14,22 @@ import java.util.concurrent.TimeUnit;
  */
 public class RequestSender {
 
-    private static final OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client;
 
-    static {
+    public RequestSender() {
+        client = new OkHttpClient();
         client.setConnectTimeout(15, TimeUnit.SECONDS);
 
-        CookieManager cookieManager = new CookieManager();
-        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+//        CookieManager cookieManager = new CookieManager();
+//        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
     }
 
     /**
-     * ¸Ã²»»á¿ªÆôÒì²½Ïß³Ì¡£
+     * è¯¥ä¸ä¼šå¼€å¯å¼‚æ­¥çº¿ç¨‹ã€‚
      * @param request
      * @return
      */
-    public static Response execute(Request request) {
+    public Response execute(Request request) {
         Response response = null;
         try {
             response = client.newCall(request).execute();
@@ -39,15 +40,15 @@ public class RequestSender {
     }
 
     /**
-     * ¿ªÆôÒì²½Ïß³Ì·ÃÎÊÍøÂç
+     * å¼€å¯å¼‚æ­¥çº¿ç¨‹è®¿é—®ç½‘ç»œ
      * @param url
      * @param responseCallback
      */
-    public static void enqueue(String url, Callback responseCallback) {
+    public void enqueue(String url, Callback responseCallback) {
         client.newCall(getRequest(url, null)).enqueue(responseCallback);
     }
 
-    public static String execute(String url, Map<String, String> postParams) {
+    public String execute(String url, Map<String, String> postParams) {
         Response response = execute(getRequest(url, postParams));
         String responseStr = null;
         if (response != null && response.isSuccessful()) {
@@ -64,17 +65,17 @@ public class RequestSender {
         return responseStr;
     }
 
-    public static String execute(String url) {
+    public String execute(String url) {
         return execute(url, null);
     }
 
-    public static Request getRequest(String url, Map<String, String> params) {
+    public Request getRequest(String url, Map<String, String> params) {
         Request.Builder builder = new Request.Builder();
         builder.url(url);
-        builder.header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko");
-        builder.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-        builder.header("Accept-Encoding", "gzip, deflate, sdch");
-        builder.header("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
+        builder.header("User-Agent", "cmblife 4.4.0 rv:452 (iPhone; iPhone OS 8.3; zh_CN)");
+//        builder.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+//        builder.header("Accept-Encoding", "gzip, deflate, sdch");
+//        builder.header("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
 
         if (params != null && params.size() > 0) {
             FormEncodingBuilder formBody = new FormEncodingBuilder();
