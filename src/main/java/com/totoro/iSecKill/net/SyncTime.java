@@ -1,4 +1,4 @@
-package com.rainbow.iSecKill.net;
+package com.totoro.iSecKill.net;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

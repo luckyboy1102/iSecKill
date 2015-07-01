@@ -1,4 +1,4 @@
-package com.rainbow.iSecKill.net;
+package com.totoro.iSecKill.net;
 
 import com.squareup.okhttp.*;
 
@@ -20,8 +20,8 @@ public class RequestSender {
         client = new OkHttpClient();
         client.setConnectTimeout(15, TimeUnit.SECONDS);
 
-//        CookieManager cookieManager = new CookieManager();
-//        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_NONE);
     }
 
     /**
@@ -73,6 +73,7 @@ public class RequestSender {
         Request.Builder builder = new Request.Builder();
         builder.url(url);
         builder.header("User-Agent", "cmblife 4.4.0 rv:452 (iPhone; iPhone OS 8.3; zh_CN)");
+        builder.header("Connection", "close");
 //        builder.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 //        builder.header("Accept-Encoding", "gzip, deflate, sdch");
 //        builder.header("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
