@@ -1,5 +1,7 @@
 package com.totoro.iSecKill.utils;
 
+import com.totoro.iSecKill.bean.Device;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -54,5 +56,9 @@ public class ParamUtil {
             return true;
         else
             return false;
+    }
+
+    public static String getUrl(Device device, String reqUrl) {
+        return reqUrl + device.toString() + "_requuid=" +UUID.randomUUID().toString().toUpperCase();
     }
 }
